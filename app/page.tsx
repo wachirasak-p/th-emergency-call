@@ -1,102 +1,137 @@
-import Image from "next/image";
+"use client";
+import { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+
+interface EmergencyItem {
+  name: string;
+  number: string;
+}
+
+const emergencyData: Record<string, EmergencyItem[]> = {
+  danger: [
+    { name: "แจ้งเหตุด่วนเหตุร้าย", number: "191" },
+    { name: "แจ้งเหตุไฟไหม้/ดับเพลิง", number: "199" },
+    { name: "ศูนย์ปราบปรามการโจรกรรมรถ", number: "1192" },
+    { name: "กองปราบ", number: "1195" },
+    { name: "แจ้งคนหาย", number: "1300" },
+    { name: "ร่วมด้วยช่วยกัน", number: "1677" },
+    { name: "ศูนย์เตือนภัยพิบัติแห่งชาติ", number: "192" },
+    { name: "แจ้งอุบัติเหตุทางน้ำ", number: "1196" },
+  ],
+  medical: [
+    { name: "การแพทย์ฉุกเฉินแห่งชาติ", number: "1669" },
+    { name: "แพทย์ฉุกเฉิน (กทม.)", number: "1646" },
+    { name: "หน่วยแพทย์ วชิรพยาบาล", number: "1554" },
+    { name: "โรงพยาบาลตำรวจ", number: "1691" },
+    { name: "กรมสุขภาพจิต", number: "1667" },
+    { name: "ป้องกันและบรรเทาสาธารณภัย", number: "1784" },
+  ],
+  utility: [
+    { name: "ไฟฟ้าส่วนภูมิภาค", number: "1129" },
+    { name: "ไฟฟ้านครหลวง", number: "1130" },
+    { name: "ประปานครหลวง", number: "1125" },
+    { name: "ประปาส่วนภูมิภาค", number: "1162" },
+    { name: "ประกันสังคม", number: "1506" },
+    { name: "ประกันภัย", number: "1186" },
+  ],
+  transport: [
+    { name: "ทางพิเศษแห่งประเทศไทย", number: "1543" },
+    { name: "ตำรวจทางหลวง", number: "1193" },
+    { name: "ตำรวจท่องเที่ยว", number: "1155" },
+    { name: "FM91 สวพ.", number: "1644" },
+    { name: "การรถไฟฯ", number: "1690" },
+    { name: "ทางหลวงชนบท", number: "1146" },
+    { name: "ช่วยเหลือนักท่องเที่ยว (TAC)", number: "02-134-4077" },
+  ],
+};
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [category, setCategory] = useState<string>("danger");
+  const [search, setSearch] = useState<string>("");
+  const [showAll, setShowAll] = useState<boolean>(false);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  const categories: { id: string; label: string }[] = [
+    { id: "danger", label: "เหตุด่วนเหตุร้าย" },
+    { id: "medical", label: "การแพทย์และโรงพยาบาล" },
+    { id: "utility", label: "สาธารณูปโภค" },
+    { id: "transport", label: "ระหว่างเดินทาง" },
+  ];
+
+  const allItems = Object.values(emergencyData).flat();
+
+  const filteredItems =
+    showAll || search
+      ? allItems.filter(
+          (item) =>
+            item.name.toLowerCase().includes(search.toLowerCase()) ||
+            item.number.includes(search),
+        )
+      : emergencyData[category];
+
+  return (
+    <div className="container mx-auto py-8">
+      <h1 className="scroll-m-20 p-4 text-4xl font-extrabold tracking-tight lg:text-5xl">
+        รวมเบอร์แจ้งเหตุฉุกเฉิน
+      </h1>
+      <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-4">
+        <div className="flex flex-col gap-2">
+          <Button
+            variant={showAll ? "default" : "outline"}
+            onClick={() => {
+              setShowAll(true);
+              setSearch("");
+            }}
+            className="justify-start"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            ทั้งหมด
+          </Button>
+          {categories.map((c) => (
+            <Button
+              key={c.id}
+              variant={!showAll && category === c.id ? "default" : "outline"}
+              onClick={() => {
+                setCategory(c.id);
+                setSearch("");
+                setShowAll(false);
+              }}
+              className="justify-start"
+            >
+              {c.label}
+            </Button>
+          ))}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+
+        <div className="col-span-3 flex flex-col gap-4">
+          <Input
+            placeholder="ค้นหาเบอร์หรือชื่อหน่วยงาน..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setShowAll(true);
+            }}
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+            {filteredItems.map((item, idx) => (
+              <a key={idx} href={`tel:${item.number}`} className="block">
+                <Card className="cursor-pointer hover:shadow-lg">
+                  <CardContent className="p-4 text-center">
+                    <div className="text-lg font-bold">{item.name}</div>
+                    <div className="text-2xl text-blue-600">{item.number}</div>
+                  </CardContent>
+                </Card>
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+      <footer className="p-4 text-center">
+        <p>จัดทำโดย {"นาย วชิรศักดิ์ คุ้มประสิทธิ์"}</p>
+        <p>
+          &copy; {new Date().getFullYear()} รวมเบอร์แจ้งเหตุฉุกเฉิน.
+          สงวนลิขสิทธิ์.
+        </p>
       </footer>
     </div>
   );
